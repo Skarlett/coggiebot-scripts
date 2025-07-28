@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from setuptools import setup, find_packages
-
 setup(
     name="deemix-stream",
     version="0.1.0",
