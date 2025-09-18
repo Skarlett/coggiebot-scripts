@@ -54,7 +54,7 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
             album_uri = extraData["trackAPI"]["album"]["tracklist"].rsplit("/", 1)[0]
             album_id = album_uri.rsplit("/", 1)[1]
 
-            if album_id in seen:
+            if not album_id in seen:
                 yield (downloadObject, extraData)
             else:
                 seen.add(album_id)
