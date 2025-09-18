@@ -46,38 +46,45 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                 'trackAPI': downloadObject.single.get('trackAPI'),
                 'albumAPI': downloadObject.single.get('albumAPI'),
             }
+            link = extraData["trackAPI"]["link"]
+            if greedy and not link in seen:
+                seen.add(link)
+                yield (downloadObject, extraData)
 
             if not greedy:
                 yield (downloadObject, extraData)
-                continue
-
-            album_uri = extraData["trackAPI"]["album"]["tracklist"].rsplit("/", 1)[0]
-            album_id = album_uri.rsplit("/", 1)[1]
-
-            if not album_id in seen:
-                yield (downloadObject, extraData)
-            else:
-                seen.add(album_id)
-                try:
-                  downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
-                except Exception as err:
-                    jerr(err)
-                    if not keep_going: exit(1)
-
-                stack.append(downloadObject)
 
         elif isinstance(downloadObject, Convertable):
             obj = plugs[downloadObject.plugin].convert(dz, downloadObject, settings)
             stack.append(obj)
 
         elif isinstance(downloadObject, Collection):
+
             for track in downloadObject.collection['tracks']:
+                album_uri = track["album"]["tracklist"].rsplit("/", 1)[0]
+                link = track["link"]
+
                 extraData = {
                     'trackAPI': track,
                     'albumAPI': downloadObject.collection.get('albumAPI'),
                     'playlistAPI': downloadObject.collection.get('playlistAPI')
                 }
-                yield (downloadObject, extraData)
+
+                if greedy and not link in seen:
+                    seen.add(link)
+                    yield (downloadObject, extraData)
+
+                if greedy and not album_uri in seen:
+                    seen.add(album_uri)
+                    try:
+                        downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                        stack.append(downloadObject)
+                        continue
+                    except Exception as err:
+                        jerr(err)
+
+                if not greedy:
+                    yield (downloadObject, extraData)
 
 def metadata(downloadObject, extraData, bitrate=TrackFormats.MP3_320):
     albumAPI = extraData.get('albumAPI')
