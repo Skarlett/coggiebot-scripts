@@ -76,12 +76,12 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
 
                 if greedy and not album_uri in seen:
                     seen.add(album_uri)
-                    try:
-                        downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
-                        stack.append(downloadObject)
-                        continue
-                    except Exception as err:
-                        jerr(err)
+                    # try:
+                    #     downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                    #     stack.append(downloadObject)
+                    #     continue
+                    # except Exception as err:
+                    #     jerr(err)
 
                 if not greedy:
                     yield (downloadObject, extraData)
@@ -133,6 +133,7 @@ def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, gr
 
 
     for url in stream_input(urls):
+        print("debug main")
         (link, _link_type, _link_id) = parseLink(url)
         try:
             downloadObject = generateDownloadObject(dz, link, bitrate, plugins=plugins)
