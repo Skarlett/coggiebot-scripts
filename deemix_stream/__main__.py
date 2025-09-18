@@ -46,24 +46,25 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                 'trackAPI': downloadObject.single.get('trackAPI'),
                 'albumAPI': downloadObject.single.get('albumAPI'),
             }
+
             if not greedy:
                 yield (downloadObject, extraData)
                 continue
 
-            album_uri = trackAPI["album"]["tracklist"].rsplit("/", 1)[0]
+            album_uri = extraData["trackAPI"]["album"]["tracklist"].rsplit("/", 1)[0]
             album_id = album_uri.rsplit("/", 1)[1]
 
             if album_id in seen:
                 yield (downloadObject, extraData)
             else:
-                seen.insert(album_id)
+                seen.add(album_id)
                 try:
                   downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
                 except Exception as err:
                     jerr(err)
                     if not keep_going: exit(1)
 
-                stack.push(downloadObject)
+                stack.append(downloadObject)
 
         elif isinstance(downloadObject, Convertable):
             obj = plugs[downloadObject.plugin].convert(dz, downloadObject, settings)
