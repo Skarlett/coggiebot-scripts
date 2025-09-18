@@ -30,10 +30,10 @@ from deemix.types.DownloadObjects import Single, Collection, Convertable
 dz = Deezer()
 settings = DEFAULT_SETTINGS
 plugins = {}
+seen = set()
 
 def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False):
     stack = [downloadObject];
-    seen = set()
 
     while len(stack):
         downloadObject = stack.pop()
