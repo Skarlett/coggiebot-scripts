@@ -31,8 +31,9 @@ dz = Deezer()
 settings = DEFAULT_SETTINGS
 plugins = {}
 
-def fan_dl_object(downloadObject, plugs):
+def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False):
     stack = [downloadObject];
+    seen = set()
 
     while len(stack):
         downloadObject = stack.pop()
@@ -45,7 +46,19 @@ def fan_dl_object(downloadObject, plugs):
                 'trackAPI': downloadObject.single.get('trackAPI'),
                 'albumAPI': downloadObject.single.get('albumAPI'),
             }
-            yield (downloadObject, extraData)
+            if not greedy:
+                yield (downloadObject, extraData)
+                continue
+
+            album_uri = trackAPI["album"]["tracklist"].rsplit("/", 1)[0]
+            album_id = album_uri.rsplit("/", 1)[1]
+
+            if album_id in seen:
+                yield (downloadObject, extraData)
+            else:
+                seen.insert(album_id)
+                downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                stack.push(downloadObject)
 
         elif isinstance(downloadObject, Convertable):
             obj = plugs[downloadObject.plugin].convert(dz, downloadObject, settings)
@@ -84,22 +97,24 @@ def stream_input(urls):
 @click.option('-s', '--spt-id', type=str, help='Path to the config folder')
 @click.option('-ss', '--spt-secret', type=str, help='Path to the config folder')
 @click.option('-sc', '--spt-cache', type=str, help='Path to the config folder')
+@click.option('-k', '--keep-going', is_flag=True, help='Path to the config folder')
+@click.option('-g', '--greedy', is_flag=True, help='Path to the config folder')
 @click.argument('urls', nargs=-1, required=False)
-def metadata(urls, arl, spt_id, spt_secret, spt_cache):
+def metadata_cli(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
     assert arl, 'You must provide an ARL token'
     assert dz.login_via_arl(arl.strip()), 'Invalid ARL'
 
     settings = DEFAULT_SETTINGS
-    
+
     plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_cache)}
     plugins["spotify"].setup()
-    
+
     bitrate = settings.get("maxBitrate", TrackFormats.MP3_320)
 
     jerr = lambda e: json.dump({
         "error": {
           "name": e.__class__.__name__,
-          "reason": urllib.parse.quote(e.message)
+          "reason": str(e)
         }
     }, sys.stderr)
 
@@ -110,9 +125,10 @@ def metadata(urls, arl, spt_id, spt_secret, spt_cache):
             downloadObject = generateDownloadObject(dz, link, bitrate, plugins=plugins)
         except Exception as err:
             jerr(err)
-            exit(1)
+            if not keep_going:
+                exit(1)
 
-        for (obj, extras) in list(fan_dl_object(downloadObject, plugins)):
+        for (obj, extras) in list(fan_dl_object(downloadObject, plugins, bitrate, greedy)):
             try:
                 metadata(obj, extras)
             except Exception as err:
@@ -123,8 +139,10 @@ def metadata(urls, arl, spt_id, spt_secret, spt_cache):
 @click.option('-s', '--spt-id', type=str, help='Path to the config folder')
 @click.option('-ss', '--spt-secret', type=str, help='Path to the config folder')
 @click.option('-sc', '--spt-cache', type=str, help='Path to the config folder')
+@click.option('-k', '--keep-going', is_flag=True, help='Path to the config folder')
+@click.option('-g', '--greedy', is_flag=True, help='Path to the config folder')
 @click.argument('urls', nargs=-1, required=False)
-def stream(urls, arl, spt_id, spt_secret, spt_cache):
+def stream(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
     assert arl, 'You must provide an ARL token'
     assert dz.login_via_arl(arl.strip()), 'Invalid ARL'
 
@@ -138,7 +156,7 @@ def stream(urls, arl, spt_id, spt_secret, spt_cache):
     jerr = lambda e: json.dump({
         "error": {
           "name": e.__class__.__name__,
-          "reason": urllib.parse.quote(e.message)
+          "reason": str(e)
         }
     }, sys.stderr)
 
@@ -149,13 +167,13 @@ def stream(urls, arl, spt_id, spt_secret, spt_cache):
             downloadObject = generateDownloadObject(dz, link, bitrate, plugins=plugins)
         except Exception as err:
             jerr(err)
-            exit(1)
+            if not keep_going: exit(1)
 
-        for (obj, extras) in list(fan_dl_object(downloadObject, plugins)):
+        for (obj, extras) in list(fan_dl_object(downloadObject, plugins, bitrate, greedy)):
             try:
                 metadata(obj, extras)
             except Exception as err:
                 jerr(err)
 
 if __name__ == '__main__':
-    main(auto_envvar_prefix='DEEMIX')
+    metadata_cli(auto_envvar_prefix='DEEMIX')
