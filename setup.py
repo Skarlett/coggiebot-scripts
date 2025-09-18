@@ -14,7 +14,7 @@ setup(
     entry_points={
         "console_scripts": [
             "deemix-stream=deemix_stream.__main__:stream",
-            "deemix-metadata=deemix_stream.__main__:metadata",
+            "deemix-metadata=deemix_stream.__main__:metadata_cli",
         ],
     },
     classifiers=[
