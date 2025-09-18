@@ -57,7 +57,12 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                 yield (downloadObject, extraData)
             else:
                 seen.insert(album_id)
-                downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                try:
+                  downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                except Exception as err:
+                    jerr(err)
+                    if not keep_going: exit(1)
+
                 stack.push(downloadObject)
 
         elif isinstance(downloadObject, Convertable):
