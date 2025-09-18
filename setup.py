@@ -13,7 +13,7 @@ setup(
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "deemix-stream=deemix_stream.__main__:stream",
+            "deemix-stream=deemix_stream.__main__:stream_cli",
             "deemix-metadata=deemix_stream.__main__:metadata_cli",
         ],
     },

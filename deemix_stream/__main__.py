@@ -105,7 +105,7 @@ def stream_input(urls):
 @click.option('-k', '--keep-going', is_flag=True, help='Path to the config folder')
 @click.option('-g', '--greedy', is_flag=True, help='Path to the config folder')
 @click.argument('urls', nargs=-1, required=False)
-def metadata_cli(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
+def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
     assert arl, 'You must provide an ARL token'
     assert dz.login_via_arl(arl.strip()), 'Invalid ARL'
 
@@ -147,7 +147,7 @@ def metadata_cli(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
 @click.option('-k', '--keep-going', is_flag=True, help='Path to the config folder')
 @click.option('-g', '--greedy', is_flag=True, help='Path to the config folder')
 @click.argument('urls', nargs=-1, required=False)
-def stream(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
+def stream_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
     assert arl, 'You must provide an ARL token'
     assert dz.login_via_arl(arl.strip()), 'Invalid ARL'
 
@@ -180,5 +180,11 @@ def stream(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
             except Exception as err:
                 jerr(err)
 
+def metadata_cli():
+    metadata_cli_caller(auto_envvar_prefix='DEEMIX')
+
+def stream_cli():
+    metadata_cli_caller(auto_envvar_prefix='DEEMIX')
+
 if __name__ == '__main__':
-    metadata_cli(auto_envvar_prefix='DEEMIX')
+    metadata_cli_caller(auto_envvar_prefix='DEEMIX')
