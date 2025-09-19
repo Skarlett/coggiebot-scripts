@@ -46,6 +46,7 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                 'trackAPI': downloadObject.single.get('trackAPI'),
                 'albumAPI': downloadObject.single.get('albumAPI'),
             }
+
             link = extraData["trackAPI"]["link"]
             if greedy and not link in seen:
                 seen.add(link)
@@ -59,10 +60,12 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
             stack.append(obj)
 
         elif isinstance(downloadObject, Collection):
-
             for track in downloadObject.collection['tracks']:
-                album_uri = track["album"]["tracklist"].rsplit("/", 1)[0]
-                link = track["link"]
+                album_uri = None
+                #album_uri = track["album"]["tracklist"].rsplit("/", 1)[0]
+                if "album" in track and "tracklist" in track["album"]:
+                    album_uri = track["album"]["tracklist"]
+                # link = track["link"]
 
                 extraData = {
                     'trackAPI': track,
@@ -74,14 +77,14 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                     seen.add(link)
                     yield (downloadObject, extraData)
 
-                if greedy and not album_uri in seen:
-                    seen.add(album_uri)
-                    # try:
-                    #     downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
-                    #     stack.append(downloadObject)
-                    #     continue
-                    # except Exception as err:
-                    #     jerr(err)
+                # if greedy and not album_uri in seen:
+                #     seen.add(album_uri)
+                # try:
+                #     downloadObject = generateDownloadObject(dz, album_uri, bitrate, plugins=plugs)
+                #     stack.append(downloadObject)
+                #     continue
+                # except Exception as err:
+                #     jerr(err)
 
                 if not greedy:
                     yield (downloadObject, extraData)
