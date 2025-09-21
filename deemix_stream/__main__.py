@@ -7,6 +7,7 @@ import requests
 import sys
 import json
 import select
+import traceback
 
 from deezer import Deezer
 from deezer import TrackFormats
@@ -130,26 +131,24 @@ def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, gr
     jerr = lambda e: json.dump({
         "error": {
           "name": e.__class__.__name__,
-          "reason": str(e)
+          "reason": str(e),
+
         }
     }, sys.stderr)
 
 
     for url in stream_input(urls):
-        print("debug main")
         (link, _link_type, _link_id) = parseLink(url)
         try:
             downloadObject = generateDownloadObject(dz, link, bitrate, plugins=plugins)
         except Exception as err:
-            jerr(err)
+            print(traceback.format_exc(), file=sys.stderr)
+
             if not keep_going:
                 exit(1)
 
         for (obj, extras) in list(fan_dl_object(downloadObject, plugins, bitrate, greedy)):
-            try:
-                metadata(obj, extras)
-            except Exception as err:
-                jerr(err)
+            metadata(obj, extras)
 
 @click.command()
 @click.option('-a', '--arl', type=str, default=None, help='ARL token to use')
@@ -183,14 +182,11 @@ def stream_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, gree
         try:
             downloadObject = generateDownloadObject(dz, link, bitrate, plugins=plugins)
         except Exception as err:
-            jerr(err)
+            print(traceback.format_exc(), file=sys.stderr)
             if not keep_going: exit(1)
 
         for (obj, extras) in list(fan_dl_object(downloadObject, plugins, bitrate, greedy)):
-            try:
                 metadata(obj, extras)
-            except Exception as err:
-                jerr(err)
 
 def metadata_cli():
     metadata_cli_caller(auto_envvar_prefix='DEEMIX')
