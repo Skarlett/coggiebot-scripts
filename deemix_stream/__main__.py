@@ -62,10 +62,10 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
 
         elif isinstance(downloadObject, Collection):
             for track in downloadObject.collection['tracks']:
-                album_uri = None
+                link = None
                 #album_uri = track["album"]["tracklist"].rsplit("/", 1)[0]
                 if "album" in track and "tracklist" in track["album"]:
-                    album_uri = track["album"]["tracklist"]
+                    link = track["album"]["tracklist"]
                 # link = track["link"]
 
                 extraData = {
@@ -74,7 +74,8 @@ def fan_dl_object(downloadObject, plugs, bitrate, greedy=False, keep_going=False
                     'playlistAPI': downloadObject.collection.get('playlistAPI')
                 }
 
-                if greedy and not link in seen:
+
+                if greedy and link and not link in seen:
                     seen.add(link)
                     yield (downloadObject, extraData)
 
