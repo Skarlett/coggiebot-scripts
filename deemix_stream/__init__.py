@@ -42,7 +42,7 @@ class SpotifyStreamer(Spotify):
 
     def loadCache(self):
         cache = None
-        if (self.cache_file).is_file():
+        if self.cache_file.is_file():
             with open(self.cache_file, 'r', encoding="utf-8") as f:
                 try:
                     cache = json.load(f)
