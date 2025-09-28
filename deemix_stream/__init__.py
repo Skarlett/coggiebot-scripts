@@ -20,13 +20,14 @@ class MockCache(dict):
         return {}
 
 class SpotifyStreamer(Spotify):
-    def __init__(self, id, secret, auth_cache):
+    def __init__(self, id, secret, auth_cache, cache_file=None):
         super().__init__(None)
         self.credentials = {
             "clientId": id,
             "clientSecret": secret,
         }
         self.auth_cache = auth_cache
+        self.cache_file = cache_file
 
     def setup(self):
         self.checkCredentials()
@@ -35,8 +36,23 @@ class SpotifyStreamer(Spotify):
     def loadCache(self):
         return MockCache()
 
-    def saveCache(self, _cache):
-        pass
+    def saveCache(self, newCache):
+        with open(self.cache_file, 'w', encoding="utf-8") as spotifyCache:
+            json.dump(newCache, spotifyCache)
+
+    def loadCache(self):
+        cache = None
+        if (self.cache_file).is_file():
+            with open(self.cache_file, 'r', encoding="utf-8") as f:
+                try:
+                    cache = json.load(f)
+                except json.decoder.JSONDecodeError:
+                    self.saveCache({'tracks': {}, 'albums': {}})
+                    cache = None
+                except Exception:
+                    cache = None
+        if not cache: cache = {'tracks': {}, 'albums': {}}
+        return cache
 
     def checkCredentials(self):
         if self.credentials['clientId'] == "" or self.credentials['clientSecret'] == "":

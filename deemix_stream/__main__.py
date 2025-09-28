@@ -97,6 +97,7 @@ def metadata(downloadObject, extraData, bitrate=TrackFormats.MP3_320):
     trackAPI = extraData.get('trackAPI')
     trackAPI['size'] = downloadObject.size
 
+    trackAPI["provider"] = "deezer"
     json.dump(trackAPI, sys.stdout)
     print("", file=sys.stdout)
     sys.stdout.flush()
@@ -124,7 +125,7 @@ def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, gr
 
     settings = DEFAULT_SETTINGS
 
-    plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_cache)}
+    plugins = {"spotify": Spotify(spt_id, spt_secret, spt_cache)}
     plugins["spotify"].setup()
 
     bitrate = settings.get("maxBitrate", TrackFormats.MP3_320)
@@ -155,11 +156,12 @@ def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, gr
 @click.option('-a', '--arl', type=str, default=None, help='ARL token to use')
 @click.option('-s', '--spt-id', type=str, help='Path to the config folder')
 @click.option('-ss', '--spt-secret', type=str, help='Path to the config folder')
-@click.option('-sc', '--spt-cache', type=str, help='Path to the config folder')
+@click.option('-sc', '--spt-auth-cache', type=str, help='Path to the config folder')
+@click.option('-sa', '--spt-link-cache', is_flag=True, help='Path to the config folder')
 @click.option('-k', '--keep-going', is_flag=True, help='Path to the config folder')
 @click.option('-g', '--greedy', is_flag=True, help='Path to the config folder')
 @click.argument('urls', nargs=-1, required=False)
-def stream_cli_caller(urls, arl, spt_id, spt_secret, spt_cache, keep_going, greedy):
+def stream_cli_caller(urls, arl, spt_id, spt_secret, spt_auth_cache, spt_link_cache, keep_going, greedy):
     assert arl, 'You must provide an ARL token'
     assert dz.login_via_arl(arl.strip()), 'Invalid ARL'
 
