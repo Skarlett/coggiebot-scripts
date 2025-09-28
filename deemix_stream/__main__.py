@@ -126,7 +126,7 @@ def metadata_cli_caller(urls, arl, spt_id, spt_secret, spt_auth_cache, spt_link_
 
     settings = DEFAULT_SETTINGS
 
-    plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_cache, spt_link_cache)}
+    plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_auth_cache, spt_link_cache)}
     plugins["spotify"].setup()
 
     bitrate = settings.get("maxBitrate", TrackFormats.MP3_320)
@@ -168,7 +168,7 @@ def stream_cli_caller(urls, arl, spt_id, spt_secret, spt_auth_cache, spt_link_ca
 
     settings = DEFAULT_SETTINGS
 
-    plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_cache, spt_link_cache)}
+    plugins = {"spotify": SpotifyStreamer(spt_id, spt_secret, spt_auth_cache, spt_link_cache)}
     plugins["spotify"].setup()
 
     bitrate = settings.get("maxBitrate", TrackFormats.MP3_320)
