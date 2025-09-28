@@ -37,12 +37,15 @@ class SpotifyStreamer(Spotify):
         return MockCache()
 
     def saveCache(self, newCache):
-        with open(self.cache_file, 'w', encoding="utf-8") as spotifyCache:
-            json.dump(newCache, spotifyCache)
+        if self.cache_file and self.cache_file.is_file():
+            with open(self.cache_file, 'w', encoding="utf-8") as spotifyCache:
+                json.dump(newCache, spotifyCache)
+                return True
+        return False
 
     def loadCache(self):
         cache = None
-        if self.cache_file.is_file():
+        if self.cache_file and self.cache_file.is_file():
             with open(self.cache_file, 'r', encoding="utf-8") as f:
                 try:
                     cache = json.load(f)
